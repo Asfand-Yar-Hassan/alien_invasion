@@ -2,6 +2,7 @@ import sys
 import pygame
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
 
 class AlienInvasion:
  """Overall class to manage assets and behaviour"""
@@ -17,6 +18,7 @@ class AlienInvasion:
   pygame.display.set_caption("Alien Invasion")
   
   self.ship = Ship(self)
+  self.bullets = pygame.sprite.Group()
   
   
  def run_game(self):
@@ -24,6 +26,7 @@ class AlienInvasion:
   while True:
    self.check_events() 
    self.ship.update()
+   self.update_bullets()
    self.update_screen()
    self.clock.tick(60)
   
@@ -47,6 +50,8 @@ class AlienInvasion:
       self.ship.moving_rirght = True
   elif event.key == pygame.K_LEFT:
       self.ship.moving_left = True
+  elif event.key == pygame.K_SPACE:
+   self.fire_bullet()
  
  def check_key_up_events(self, event):
   if event.key == pygame.K_RIGHT:
@@ -54,9 +59,26 @@ class AlienInvasion:
   elif event.key == pygame.K_LEFT:
       self.ship.moving_left =False
  
+ def fire_bullet(self):
+  """Create a new bullet and add it to the group"""
+  if len(self.bullets) < self.settings.bullets_allowed:
+   new_bullet = Bullet(self)
+   self.bullets.add(new_bullet) 
+   
+ def update_bullets(self):
+  self.bullets.update()
+   # Get rid of bullets which have disappeared from the screen
+  for bullet in self.bullets.copy():
+    if bullet.rect.bottom <= 0:
+     self.bullets.remove(bullet)
+ 
  def update_screen(self):
    # Redraw the screen during each iteration through the loop
    self.screen.fill(self.settings.bg_color)
+   
+   for bullet in self.bullets.sprites():
+    bullet.draw_bullet()
+   
    self.ship.blitme()
     
    # Make the screen visible

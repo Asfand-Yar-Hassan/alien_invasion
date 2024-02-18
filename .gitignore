@@ -1,1 +1,5 @@
 __pycache__/
+/Setup
+*.pyc
+/build/
+/src_py/version.py

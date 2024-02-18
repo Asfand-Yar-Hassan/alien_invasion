@@ -7,6 +7,7 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from button import Button
+from scoreboard import Scoreboard
 
 class AlienInvasion:
  """Overall class to manage assets and behaviour"""
@@ -22,6 +23,7 @@ class AlienInvasion:
   pygame.display.set_caption("Alien Invasion")
   
   self.stats = GameStats(self)
+  self.sb = Scoreboard(self)
   
   self.ship = Ship(self)
   self.bullets = pygame.sprite.Group()
@@ -41,7 +43,7 @@ class AlienInvasion:
      self.ship.update()
      self._update_bullets()
      self._update_aliens()
-   self.update_screen()
+   self._update_screen()
    self.clock.tick(60)
   
  def check_events(self):
@@ -80,6 +82,8 @@ class AlienInvasion:
   if button_clicked and not self.game_active:
     self.settings.initialize_dynamic_settings()
     pygame.mouse.set_visible(False)
+    self.stats.reset_stats()
+    self.sb.prep_score()
     self.game_active = True    
  
  def fire_bullet(self):
@@ -98,7 +102,11 @@ class AlienInvasion:
     
  def _check_bullet_collisions(self):
     # Detect collisions, remove the alien and bullet
-   pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+   collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+   if collisions:
+     for aliens in collisions.values():
+       self.stats.score += self.settings.alien_points * len(aliens)
+     self.sb.prep_score()
    # Create a new fleet if the existing fleet is destroyed
    if not self.aliens:
     self.bullets.empty()
@@ -173,7 +181,7 @@ class AlienInvasion:
      alien.rect.y += self.settings.fleet_drop_speed
    self.settings.fleet_direction *= -1
   
- def update_screen(self):
+ def _update_screen(self):
    # Redraw the screen during each iteration through the loop
    self.screen.fill(self.settings.bg_color)
    
@@ -182,6 +190,8 @@ class AlienInvasion:
    
    self.ship.blitme()
    self.aliens.draw(self.screen)
+   
+   self.sb.show_score()
    
    if not self.game_active:
      self.play_button.draw_button()

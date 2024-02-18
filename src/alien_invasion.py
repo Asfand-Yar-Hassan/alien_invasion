@@ -19,7 +19,8 @@ class AlienInvasion:
         self.clock = pygame.time.Clock()
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(
+            (self.settings.screen_width, self.settings.screen_height))
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
@@ -85,6 +86,7 @@ class AlienInvasion:
             self.stats.reset_stats()
             self.sb.prep_score()
             self.sb.prep_level()
+            self.sb.prep_ships()
             self.game_active = True
 
     def fire_bullet(self):
@@ -163,6 +165,7 @@ class AlienInvasion:
     def _ship_hit(self):
         if self.stats.ships_left > 0:
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             # Get rid off bullets and aliens once the ship is hit
             self.bullets.empty()

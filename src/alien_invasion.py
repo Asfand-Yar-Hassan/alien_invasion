@@ -76,8 +76,11 @@ class AlienInvasion:
       self.ship.moving_left =False
   
  def _check_play_button(self, mouse_pos):
-    if self.play_button.rect.collidepoint(mouse_pos):
-      self.game_active = True    
+  button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+  if button_clicked and not self.game_active:
+    self.settings.initialize_dynamic_settings()
+    pygame.mouse.set_visible(False)
+    self.game_active = True    
  
  def fire_bullet(self):
   """Create a new bullet and add it to the group"""
@@ -100,6 +103,7 @@ class AlienInvasion:
    if not self.aliens:
     self.bullets.empty()
     self._create_fleet()
+    self.settings.increase_speed()
     
      
  def _create_fleet(self):
@@ -135,15 +139,15 @@ class AlienInvasion:
    
  def _check_ship_collision(self):
      if pygame.sprite.spritecollideany(self.ship, self.aliens):
-       self.ship_hit()
+       self._ship_hit()
       
  def _check_aliens_bottom(self):
    for alien in self.aliens.sprites():
      if alien.rect.bottom >= self.settings.screen_height:
-       self.ship_hit()
+       self._ship_hit()
        break     
        
- def ship_hit(self):
+ def _ship_hit(self):
    if self.stats.ships_left > 0:
     self.stats.ships_left -= 1
    
@@ -155,7 +159,8 @@ class AlienInvasion:
     self.ship.center_ship()
     sleep(0.5)
    else:
-     self.game_active = False 
+     self.game_active = False
+     pygame.mouse.set_visible(True)
     
  def _check_fleet_edges(self):
    for alien in self.aliens.sprites():
